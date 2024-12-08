@@ -1,0 +1,69 @@
+# Build and deploy ASP.Net Core app to Azure Web Apps - TestTheRazor and TestTheRazorStage
+
+name: Build and Deploy to Two Azure Web Apps
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.x'
+
+      - name: Build with dotnet
+        run: dotnet build --configuration Release
+
+      - name: dotnet publish
+        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
+
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v4
+        with:
+          name: .net-app
+          path: ${{env.DOTNET_ROOT}}/myapp
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+
+    strategy:
+      matrix:
+        app:
+          - name: TestTheRazor
+            url: testtherazor-hmapbuggcyf2gkh5.ukwest-01.azurewebsites.net
+            client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_BDCF2EA8FAFB4FDBA8ED9D057685D703 }}
+            tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_D62D850B2775479BB4CF29658514B8D9 }}
+            subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_F366514802E34BDF92F7D22B277D4D46 }}
+          - name: TestTheRazorStage
+            url: testtherazorstage-e0epeudubfbvbnh0.ukwest-01.azurewebsites.net
+            client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_71AA7B963D8B43ADB158B3EEF2F958C0 }}
+            tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_B5CD0B6E8E7548D0BA396654AC71801C }}
+            subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_22D42E4AC877430BA7B714560A5670F3 }}
+
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v4
+        with:
+          name: .net-app
+
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ matrix.app.client-id }}
+          tenant-id: ${{ matrix.app.tenant-id }}
+          subscription-id: ${{ matrix.app.subscription-id }}
+
+      - name: Deploy to Azure Web App
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ matrix.app.name }}
+          slot-name: 'Production'
+          package: .
