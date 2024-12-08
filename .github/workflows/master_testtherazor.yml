@@ -2,7 +2,6 @@
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
 name: Build and deploy ASP.Net Core app to Azure Web App - TestTheRazor
-
 on:
   push:
     branches:
@@ -41,6 +40,7 @@ jobs:
       url: testtherazor-hmapbuggcyf2gkh5.ukwest-01.azurewebsites.net
     permissions:
       id-token: write #This is required for requesting the JWT
+      
 
     steps:
       - name: Download artifact from build job
