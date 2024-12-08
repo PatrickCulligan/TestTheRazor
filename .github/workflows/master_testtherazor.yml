@@ -3,9 +3,6 @@
 
 name: Build and deploy ASP.Net Core app to Azure Web App - TestTheRazor
 on:
-  push:
-    branches:
-      - master
   workflow_dispatch:
 
 jobs:
