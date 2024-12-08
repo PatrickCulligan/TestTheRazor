@@ -59,4 +59,24 @@ jobs:
           app-name: 'TestTheRazor'
           slot-name: 'Production'
           package: .
+    
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v4
+        with:
+          name: .net-app
+      
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_71AA7B963D8B43ADB158B3EEF2F958C0 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_B5CD0B6E8E7548D0BA396654AC71801C }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_22D42E4AC877430BA7B714560A5670F3 }}
+
+      - name: Deploy to Azure Web App
+        id: deploy-to-webapp-stage
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'TestTheRazorStage'
+          slot-name: 'Production'
+          package: .
           
